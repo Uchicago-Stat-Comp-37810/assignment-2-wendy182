@@ -20,3 +20,34 @@ plot_chain(chain, burnIn, c(5,0,10),c("a","b","sd"))
 
 # for comparison:
 summary(lm(y~x))
+
+# compare_outcomes:
+compare_outcomes <- function(iterations){
+  mean_sd_of_a = array(dim = c(10, 2))
+  for (j in 1:10){
+    startvalue = c()
+    startvalue[1] = runif(1, min=0, max=10)
+    startvalue[2] = rnorm(1, sd=5)
+    startvalue[3] = runif(1, min=0, max=30)
+    chain = array(dim = c(iterations+1, 3))
+    chain[1, ] = startvalue
+    for (i in 1:iterations){
+      proposal = proposalfunction(chain[i, ])
+      probab = exp(posterior(proposal) - posterior(chain[i, ]))
+      if (runif(1) < probab){
+        chain[i+1, ] = proposal 
+      } else{
+        chain[i+1, ] = chain[i, ]
+      }
+    }
+    mean_sd_of_a[j,] = c(mean(chain[, 1]), sd(chain[, 1]))
+  }
+  return (mean_sd_of_a)
+}
+
+compare_outcomes(1000)
+compare_outcomes(10000)
+compare_outcomes(100000)
+
+
+
